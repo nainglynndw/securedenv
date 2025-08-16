@@ -1,0 +1,56 @@
+{
+  "name": "securedenv",
+  "version": "1.0.0",
+  "description": "Secure environment variable encryption and management for cross-platform projects",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "bin": {
+    "secenv": "./bin/secenv.js"
+  },
+  "scripts": {
+    "test": "node test.js",
+    "prepublishOnly": "npm test"
+  },
+  "keywords": [
+    "environment",
+    "encryption",
+    "env",
+    "security",
+    "development",
+    "cli",
+    "cross-platform",
+    "aes-256-gcm",
+    "backup",
+    "restore"
+  ],
+  "author": "nainglynndw",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nainglynndw/securedenv.git"
+  },
+  "homepage": "https://github.com/nainglynndw/securedenv#readme",
+  "bugs": {
+    "url": "https://github.com/nainglynndw/securedenv/issues"
+  },
+  "dependencies": {
+    "commander": "^9.4.1",
+    "chalk": "^4.1.2",
+    "glob": "^8.0.3"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "files": [
+    "bin/",
+    "src/",
+    "index.js",
+    "index.d.ts",
+    "examples/",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}
