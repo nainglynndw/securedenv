@@ -23,16 +23,10 @@ SecuredEnv provides a simple yet powerful way to encrypt, backup, and manage env
 npm install -g securedenv
 ```
 
-### As a library (local)
+### Use without installing
 
 ```bash
-npm install securedenv
-```
-
-### As a dev dependency
-
-```bash
-npm install --save-dev securedenv
+npx secenv --help
 ```
 
 ## CLI Usage
@@ -53,7 +47,7 @@ secenv export --key "YourStrongPassword123!" --file "./my-backup.secenv"
 secenv import --key "YourStrongPassword123!" --file "./my-backup.secenv"
 ```
 
-### As dev dependency (with npx)
+### Use without installing (with npx)
 
 ```bash
 # If installed as dev dependency, use npx
