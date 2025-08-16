@@ -41,10 +41,10 @@ secenv backup --key "YourStrongPassword123!"
 secenv restore --key "YourStrongPassword123!"
 
 # Export backup to a file
-secenv export --key "YourStrongPassword123!" --file "./my-backup.secenv"
+secenv export --output "./my-backup.secenv"
 
 # Import backup from a file
-secenv import --key "YourStrongPassword123!" --file "./my-backup.secenv"
+secenv import --key "YourStrongPassword123!" "./my-backup.secenv"
 ```
 
 ### Use without installing (with npx)
@@ -53,8 +53,8 @@ secenv import --key "YourStrongPassword123!" --file "./my-backup.secenv"
 # If installed as dev dependency, use npx
 npx secenv backup --key "YourStrongPassword123!"
 npx secenv restore --key "YourStrongPassword123!"
-npx secenv export --key "YourStrongPassword123!" --file "./backup.secenv"
-npx secenv import --key "YourStrongPassword123!" --file "./backup.secenv"
+npx secenv export --output "./backup.secenv"
+npx secenv import --key "YourStrongPassword123!" "./backup.secenv"
 ```
 
 ### Real-world Workflow
@@ -70,10 +70,10 @@ secenv backup --key "MySecurePassword123!"
 secenv restore --key "MySecurePassword123!"
 
 # 4. Export for sharing with team
-secenv export --key "MySecurePassword123!" --file "./prod-env.secenv"
+secenv export --output "./prod-env.secenv"
 
 # 5. On another machine, import the backup
-secenv import --key "MySecurePassword123!" --file "./prod-env.secenv"
+secenv import --key "MySecurePassword123!" "./prod-env.secenv"
 ```
 
 ## Security Features
