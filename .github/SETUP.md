@@ -47,7 +47,7 @@ This is automatically provided by GitHub Actions - no setup needed.
 
 **Tests:**
 - Cross-platform testing (Ubuntu, Windows, macOS)
-- Multiple Node.js versions (16, 18, 20)
+- Multiple Node.js versions (20, 22)
 - Security audit
 - CLI functionality tests
 

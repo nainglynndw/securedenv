@@ -18,6 +18,8 @@ SecuredEnv provides a simple yet powerful way to encrypt, backup, and manage env
 
 ## Installation
 
+**Requirements:** Node.js ≥ 20.0.0
+
 ### As a CLI tool (global)
 
 ```bash
