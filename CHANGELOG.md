@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.1] - 2025-08-17
+
+### Fixed
+- 🔧 **Node.js compatibility** - Updated requirement to ≥20.0.0 for release tooling
+- 🛠️ **GitHub Actions workflow** - Fixed workflow permissions for automated releases
+- 📚 **Documentation** - Enhanced README with comprehensive testing verification
+
+### Security
+- 🔒 **Branch protection** - Configured proper GitHub repository security settings
+- 🤖 **Workflow permissions** - Secured CI/CD pipeline while enabling releases
+
+### Testing
+- ✅ **All commands verified** - Manual testing of backup, restore, export, import, push, pull
+- 🧪 **Cross-platform compatibility** - Confirmed Node.js API stability across versions
+- 🚀 **Production ready** - Full end-to-end testing completed
+
 ## [1.1.0] - 2025-08-17
 
 ### Added
@@ -82,6 +98,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Binary format with XOR obfuscation
 - Project-specific subdirectories using SHA256 hash
 
+[1.1.1]: https://github.com/nainglynndw/securedenv/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/nainglynndw/securedenv/compare/v1.0.2...v1.1.0
 [1.0.2]: https://github.com/nainglynndw/securedenv/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/nainglynndw/securedenv/compare/v1.0.0...v1.0.1
