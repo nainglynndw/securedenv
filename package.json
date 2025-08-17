@@ -1,6 +1,6 @@
 {
   "name": "securedenv",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "Secure environment variable encryption and management for cross-platform projects",
   "main": "index.js",
   "types": "index.d.ts",
@@ -9,7 +9,11 @@
   },
   "scripts": {
     "test": "node test.js",
-    "prepublishOnly": "npm test"
+    "prepublishOnly": "npm test",
+    "release": "release-it",
+    "release:patch": "release-it patch",
+    "release:minor": "release-it minor",
+    "release:major": "release-it major"
   },
   "keywords": [
     "environment",
@@ -21,7 +25,10 @@
     "cross-platform",
     "aes-256-gcm",
     "backup",
-    "restore"
+    "restore",
+    "github",
+    "cloud-backup",
+    "sync"
   ],
   "author": "nainglynndw",
   "license": "MIT",
@@ -34,9 +41,10 @@
     "url": "https://github.com/nainglynndw/securedenv/issues"
   },
   "dependencies": {
-    "commander": "^9.4.1",
     "chalk": "^4.1.2",
-    "glob": "^8.0.3"
+    "commander": "^9.4.1",
+    "glob": "^8.0.3",
+    "node-fetch": "^2.7.0"
   },
   "engines": {
     "node": ">=16.0.0"
@@ -48,9 +56,14 @@
     "index.d.ts",
     "examples/",
     "README.md",
+    "CHANGELOG.md",
     "LICENSE"
   ],
   "publishConfig": {
     "access": "public"
+  },
+  "devDependencies": {
+    "@release-it/conventional-changelog": "^10.0.1",
+    "release-it": "^19.0.4"
   }
 }

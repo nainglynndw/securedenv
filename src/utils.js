@@ -3,6 +3,7 @@ const path = require('path');
 const crypto = require('crypto');
 const os = require('os');
 const glob = require('glob');
+const fetch = require('node-fetch');
 
 class SecEnvUtils {
   static getProjectInfo() {
@@ -229,6 +230,129 @@ class SecEnvUtils {
   static async writeBackupFile(filePath, data) {
     const binaryData = this.serializeBinary(data);
     await fs.writeFile(filePath, binaryData);
+  }
+
+  // GitHub Configuration
+  static getConfigDir() {
+    const secEnvDir = this.getSecEnvDir();
+    return path.join(secEnvDir, 'config');
+  }
+
+  static getConfigFile() {
+    return path.join(this.getConfigDir(), 'config.json');
+  }
+
+  static async ensureConfigDir() {
+    const configDir = this.getConfigDir();
+    await fs.mkdir(configDir, { recursive: true });
+    return configDir;
+  }
+
+  static async readConfig() {
+    try {
+      const configFile = this.getConfigFile();
+      const configData = await fs.readFile(configFile, 'utf8');
+      return JSON.parse(configData);
+    } catch (error) {
+      return {}; // Return empty config if file doesn't exist
+    }
+  }
+
+  static async writeConfig(config) {
+    await this.ensureConfigDir();
+    const configFile = this.getConfigFile();
+    await fs.writeFile(configFile, JSON.stringify(config, null, 2), 'utf8');
+  }
+
+  static async setGitHubConfig(token, repo) {
+    const config = await this.readConfig();
+    config.github = { token, repo };
+    await this.writeConfig(config);
+  }
+
+  static async getGitHubConfig() {
+    const config = await this.readConfig();
+    return config.github || {};
+  }
+
+  // GitHub API functions
+  static async githubApiRequest(endpoint, options = {}) {
+    const { token } = await this.getGitHubConfig();
+    if (!token) {
+      throw new Error('GitHub token not configured. Run: secenv config --github-token <token>');
+    }
+
+    const url = `https://api.github.com${endpoint}`;
+    const headers = {
+      'Authorization': `token ${token}`,
+      'User-Agent': 'SecuredEnv/1.0.0',
+      'Accept': 'application/vnd.github.v3+json',
+      ...options.headers
+    };
+
+    const response = await fetch(url, {
+      ...options,
+      headers
+    });
+
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(`GitHub API error: ${response.status} ${error}`);
+    }
+
+    return response;
+  }
+
+  static async uploadToGitHub(projectName, backupData) {
+    const { repo } = await this.getGitHubConfig();
+    if (!repo) {
+      throw new Error('GitHub repo not configured. Run: secenv config --github-repo owner/repo');
+    }
+
+    const filePath = `${projectName}/backup.secenv`;
+    const content = this.serializeBinary(backupData).toString('base64');
+
+    // Check if file exists to get SHA for update
+    let sha = null;
+    try {
+      const existingResponse = await this.githubApiRequest(`/repos/${repo}/contents/${filePath}`);
+      const existingData = await existingResponse.json();
+      sha = existingData.sha;
+    } catch (error) {
+      // File doesn't exist, that's okay
+    }
+
+    // Upload/update file
+    const payload = {
+      message: `Update environment backup for ${projectName}`,
+      content,
+      ...(sha && { sha })
+    };
+
+    await this.githubApiRequest(`/repos/${repo}/contents/${filePath}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+  }
+
+  static async downloadFromGitHub(projectName) {
+    const { repo } = await this.getGitHubConfig();
+    if (!repo) {
+      throw new Error('GitHub repo not configured. Run: secenv config --github-repo owner/repo');
+    }
+
+    const filePath = `${projectName}/backup.secenv`;
+    
+    const response = await this.githubApiRequest(`/repos/${repo}/contents/${filePath}`);
+    const data = await response.json();
+    
+    if (data.type !== 'file') {
+      throw new Error(`No backup found for project '${projectName}' in GitHub repo`);
+    }
+
+    const content = Buffer.from(data.content, 'base64');
+    return this.deserializeBinary(content);
   }
 }
 

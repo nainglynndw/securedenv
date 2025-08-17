@@ -50,6 +50,34 @@ async function main() {
         await SecEnvCommands.import(file, options);
       });
 
+    // Config command
+    program
+      .command('config')
+      .description('Configure GitHub integration')
+      .option('--github-token <token>', 'Set GitHub personal access token')
+      .option('--github-repo <repo>', 'Set GitHub repository (owner/repo)')
+      .action(async (options) => {
+        await SecEnvCommands.config(options);
+      });
+
+    // Push command
+    program
+      .command('push')
+      .description('Push backup to GitHub repository')
+      .requiredOption('--key <password>', 'Encryption key/password')
+      .action(async (options) => {
+        await SecEnvCommands.push(options);
+      });
+
+    // Pull command
+    program
+      .command('pull')
+      .description('Pull backup from GitHub repository')
+      .requiredOption('--key <password>', 'Decryption key/password')
+      .action(async (options) => {
+        await SecEnvCommands.pull(options);
+      });
+
     // Show help if no command provided
     if (process.argv.length <= 2) {
       program.help();

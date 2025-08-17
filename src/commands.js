@@ -194,6 +194,112 @@ class SecEnvCommands {
       process.exit(1);
     }
   }
+
+  static async config(options) {
+    try {
+      if (options.githubToken) {
+        const existingConfig = await SecEnvUtils.getGitHubConfig();
+        await SecEnvUtils.setGitHubConfig(options.githubToken, existingConfig.repo || '');
+        console.log(chalk.green('✅ GitHub token configured'));
+        return;
+      }
+
+      if (options.githubRepo) {
+        const existingConfig = await SecEnvUtils.getGitHubConfig();
+        await SecEnvUtils.setGitHubConfig(existingConfig.token || '', options.githubRepo);
+        console.log(chalk.green(`✅ GitHub repo configured: ${options.githubRepo}`));
+        return;
+      }
+
+      // Show current config
+      const config = await SecEnvUtils.getGitHubConfig();
+      console.log(chalk.blue('📋 Current Configuration:'));
+      console.log(chalk.gray(`GitHub Token: ${config.token ? '***configured***' : 'not set'}`));
+      console.log(chalk.gray(`GitHub Repo: ${config.repo || 'not set'}`));
+
+    } catch (error) {
+      console.error(chalk.red('❌ Config failed:'), error.message);
+      process.exit(1);
+    }
+  }
+
+  static async push(options) {
+    try {
+      const { projectName } = SecEnvUtils.getProjectInfo();
+      
+      if (!options.key) {
+        throw new Error('Encryption key is required. Use --key <password>');
+      }
+
+      console.log(chalk.blue(`☁️  Pushing backup to GitHub for project: ${projectName}`));
+
+      // First create local backup
+      console.log(chalk.gray('📦 Creating local backup...'));
+      await this.backup(options);
+
+      // Read the backup data
+      const backupFile = SecEnvUtils.getProjectBackupFile();
+      const backupData = await SecEnvUtils.readBackupFile(backupFile);
+
+      // Upload to GitHub
+      console.log(chalk.gray('⬆️  Uploading to GitHub...'));
+      await SecEnvUtils.uploadToGitHub(projectName, backupData);
+
+      console.log(chalk.green('✅ Push completed!'));
+      console.log(chalk.gray(`📁 Project: ${projectName}`));
+      console.log(chalk.gray(`☁️  Uploaded to GitHub repo`));
+
+    } catch (error) {
+      console.error(chalk.red('❌ Push failed:'), error.message);
+      process.exit(1);
+    }
+  }
+
+  static async pull(options) {
+    try {
+      const { projectName } = SecEnvUtils.getProjectInfo();
+      
+      if (!options.key) {
+        throw new Error('Decryption key is required. Use --key <password>');
+      }
+
+      console.log(chalk.blue(`☁️  Pulling backup from GitHub for project: ${projectName}`));
+
+      // Download from GitHub
+      console.log(chalk.gray('⬇️  Downloading from GitHub...'));
+      const backupData = await SecEnvUtils.downloadFromGitHub(projectName);
+
+      console.log(chalk.gray(`📂 Original project: ${backupData.projectName}`));
+      console.log(chalk.gray(`📅 Backup date: ${new Date(backupData.timestamp).toLocaleString()}`));
+
+      // Save to local storage
+      await SecEnvUtils.ensureProjectDir();
+      const backupFile = SecEnvUtils.getProjectBackupFile();
+      await SecEnvUtils.writeBackupFile(backupFile, backupData);
+
+      // Decrypt and restore environment files
+      const envFiles = Object.keys(backupData.environments);
+      
+      for (const envFile of envFiles) {
+        console.log(chalk.gray(`🔓 Decrypting ${envFile}...`));
+        
+        const envData = backupData.environments[envFile];
+        const decryptedContent = SecEnvUtils.decrypt(envData.encrypted, options.key);
+        
+        console.log(chalk.gray(`📝 Creating ${envFile}...`));
+        await SecEnvUtils.writeEnvFile(envFile, decryptedContent);
+      }
+
+      console.log(chalk.green('✅ Pull completed!'));
+      console.log(chalk.gray(`📁 Project: ${projectName}`));
+      console.log(chalk.gray(`📄 Files: ${envFiles.join(', ')}`));
+      console.log(chalk.gray(`💾 Stored: ${backupFile}`));
+
+    } catch (error) {
+      console.error(chalk.red('❌ Pull failed:'), error.message);
+      process.exit(1);
+    }
+  }
 }
 
 module.exports = SecEnvCommands;

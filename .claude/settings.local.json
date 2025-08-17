@@ -4,7 +4,13 @@
       "Bash(mkdir:*)",
       "Bash(chmod:*)",
       "Bash(npm install)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(node:*)",
+      "Bash(npm test)",
+      "Bash(npm install:*)",
+      "Bash(npm run test:*)",
+      "Bash(npx release-it:*)",
+      "Bash(git add:*)"
     ],
     "deny": [],
     "ask": []
