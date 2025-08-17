@@ -4,7 +4,8 @@
  * Basic SecuredEnv Library Usage Example
  * 
  * This example demonstrates the core functionality of SecuredEnv:
- * - Backing up environment files
+ * - Backing up environment files with passwords
+ * - Using binary key files for enhanced security
  * - Restoring environment files
  * - Checking for existing backups
  * - Getting backup information
@@ -80,6 +81,34 @@ async function basicExample() {
     console.log(`   🕒 Original backup date: ${new Date(restoreResult.timestamp).toLocaleString()}\n`);
 
     console.log('✅ Basic usage example completed successfully!');
+    
+    // 9. Demonstrate key file usage (API level)
+    console.log('\\n9. Demonstrating key file usage...');
+    const fs = require('fs').promises;
+    const crypto = require('crypto');
+    
+    // Generate a simple key file
+    const keyFile = 'demo.key';
+    const keyData = crypto.randomBytes(32);
+    await fs.writeFile(keyFile, keyData);
+    console.log('   🔑 Generated demo key file');
+    
+    // Create backup using key file
+    const keyFilePassword = keyData.toString('base64');
+    const keyBackupResult = await SecuredEnv.backup(keyFilePassword);
+    console.log(`   ✅ Backup with key file: ${keyBackupResult.files.join(', ')}`);
+    
+    // Remove files and restore
+    for (const file of keyBackupResult.files) {
+      await fs.unlink(file);
+    }
+    
+    const keyRestoreResult = await SecuredEnv.restore(keyFilePassword);
+    console.log(`   ✅ Restored with key file: ${keyRestoreResult.files.join(', ')}`);
+    
+    // Cleanup
+    await fs.unlink(keyFile);
+    console.log('   🧹 Cleaned up demo key file');
 
   } catch (error) {
     console.error('❌ Error:', error.message);

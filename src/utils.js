@@ -275,6 +275,45 @@ class SecEnvUtils {
     return config.github || {};
   }
 
+  static async readKeyFromFile(keyPath) {
+    try {
+      const buffer = await fs.readFile(keyPath);
+      // Convert binary data to a string representation for use as password
+      return buffer.toString('base64');
+    } catch (error) {
+      throw new Error(`Cannot read key file '${keyPath}': ${error.message}`);
+    }
+  }
+
+  static generateKeyFile() {
+    // Generate 32 bytes of cryptographically secure random data
+    return crypto.randomBytes(32);
+  }
+
+  static async writeKeyFile(keyPath, keyData) {
+    try {
+      await fs.writeFile(keyPath, keyData);
+    } catch (error) {
+      throw new Error(`Cannot write key file '${keyPath}': ${error.message}`);
+    }
+  }
+
+  static async resolveKey(options) {
+    if (options.keyFile && options.key) {
+      throw new Error('Cannot specify both --key and --key-file options. Use one or the other.');
+    }
+
+    if (options.keyFile) {
+      return await this.readKeyFromFile(options.keyFile);
+    }
+
+    if (options.key) {
+      return options.key;
+    }
+
+    throw new Error('Encryption key is required. Use --key <password> or --key-file <file>');
+  }
+
   // GitHub API functions
   static async githubApiRequest(endpoint, options = {}) {
     const { token } = await this.getGitHubConfig();

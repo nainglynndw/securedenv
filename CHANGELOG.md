@@ -7,6 +7,47 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2025-08-17
+
+### Added
+- 🔑 **Binary Key Files** - Support for secure binary key files alongside passwords
+- 🔐 **New CLI Command**: `secenv generate-key --output <file>` - Create cryptographically secure 32-byte key files
+- 🔧 **Dual key support** - All encryption commands now accept both `--key <password>` and `--key-file <file>` options
+- ⚡ **Enhanced security** - Unreadable binary format for maximum protection
+- 🛠️ **CI/CD ready** - Perfect for automated deployments and secure pipelines
+- 🔒 **Flexible key sources** - Use any binary file (SSH keys, certificates, etc.) as encryption key
+
+### Enhanced Commands
+- 🔄 **backup/restore** - Now support both `--key` and `--key-file` options
+- ☁️ **push/pull** - GitHub integration works with both password and key file authentication
+- 📤 **import/export** - External backup handling supports key files
+- 🛡️ **Mutual exclusion** - Cannot use both `--key` and `--key-file` simultaneously (security by design)
+
+### Security Improvements
+- 🔒 **Binary key format** - 32 bytes of cryptographically secure random data
+- 📁 **Key file isolation** - Key files remain local, never uploaded to GitHub
+- 🛡️ **Cross-key protection** - Different keys cannot decrypt each other's data
+- 🔐 **Custom key support** - Any readable binary file can serve as encryption key
+
+### Testing
+- ✅ **Comprehensive test suite** - 14 automated test cases covering all scenarios
+- 🧪 **Key file validation** - Tests for generation, usage, and error handling
+- 🔒 **Security verification** - Cross-compatibility and isolation testing
+- ☁️ **GitHub integration** - Full push/pull testing with both key types
+
+### Technical Details
+- Generated keys are 32 bytes of cryptographically secure random data
+- Key files stored in binary format (unreadable as text)
+- Base64 conversion used internally for encryption
+- Backward compatibility maintained with existing password-based workflows
+- Error handling for missing files, invalid options, and mutual exclusion
+
+### Documentation
+- 📚 **Updated README** - Complete binary key file usage guide
+- 💡 **New examples** - Key file workflows for individual developers, teams, and CI/CD
+- 🔧 **CLI reference** - Updated command documentation with all options
+- 🛠️ **Real-world usage** - Enterprise and automation use cases
+
 ## [1.1.1] - 2025-08-17
 
 ### Fixed
@@ -98,6 +139,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Binary format with XOR obfuscation
 - Project-specific subdirectories using SHA256 hash
 
+[1.2.0]: https://github.com/nainglynndw/securedenv/compare/v1.1.1...v1.2.0
 [1.1.1]: https://github.com/nainglynndw/securedenv/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/nainglynndw/securedenv/compare/v1.0.2...v1.1.0
 [1.0.2]: https://github.com/nainglynndw/securedenv/compare/v1.0.1...v1.0.2

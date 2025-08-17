@@ -7,9 +7,7 @@ class SecEnvCommands {
     try {
       const { projectName } = SecEnvUtils.getProjectInfo();
       
-      if (!options.key) {
-        throw new Error('Encryption key is required. Use --key <password>');
-      }
+      const key = await SecEnvUtils.resolveKey(options);
 
       console.log(chalk.blue(`🔍 Finding environment files in project: ${projectName}`));
       
@@ -35,7 +33,7 @@ class SecEnvCommands {
         const content = await SecEnvUtils.readEnvFile(envFile);
         
         console.log(chalk.gray(`🔒 Encrypting ${envFile}...`));
-        const encrypted = SecEnvUtils.encrypt(content, options.key);
+        const encrypted = SecEnvUtils.encrypt(content, key);
         
         backupData.environments[envFile] = {
           encrypted,
@@ -100,9 +98,7 @@ class SecEnvCommands {
     try {
       const { projectName } = SecEnvUtils.getProjectInfo();
       
-      if (!options.key) {
-        throw new Error('Decryption key is required. Use --key <password>');
-      }
+      const key = await SecEnvUtils.resolveKey(options);
 
       console.log(chalk.blue(`📥 Restoring environments for project: ${projectName}`));
 
@@ -126,7 +122,7 @@ class SecEnvCommands {
         console.log(chalk.gray(`🔓 Decrypting ${envFile}...`));
         
         const envData = backupData.environments[envFile];
-        const decryptedContent = SecEnvUtils.decrypt(envData.encrypted, options.key);
+        const decryptedContent = SecEnvUtils.decrypt(envData.encrypted, key);
         
         console.log(chalk.gray(`📝 Creating ${envFile}...`));
         await SecEnvUtils.writeEnvFile(envFile, decryptedContent);
@@ -146,9 +142,7 @@ class SecEnvCommands {
     try {
       const { projectName } = SecEnvUtils.getProjectInfo();
       
-      if (!options.key) {
-        throw new Error('Decryption key is required. Use --key <password>');
-      }
+      const key = await SecEnvUtils.resolveKey(options);
 
       console.log(chalk.blue(`📥 Importing environments to project: ${projectName}`));
 
@@ -177,7 +171,7 @@ class SecEnvCommands {
         console.log(chalk.gray(`🔓 Decrypting ${envFile}...`));
         
         const envData = backupData.environments[envFile];
-        const decryptedContent = SecEnvUtils.decrypt(envData.encrypted, options.key);
+        const decryptedContent = SecEnvUtils.decrypt(envData.encrypted, key);
         
         console.log(chalk.gray(`📝 Creating ${envFile}...`));
         await SecEnvUtils.writeEnvFile(envFile, decryptedContent);
@@ -227,9 +221,7 @@ class SecEnvCommands {
     try {
       const { projectName } = SecEnvUtils.getProjectInfo();
       
-      if (!options.key) {
-        throw new Error('Encryption key is required. Use --key <password>');
-      }
+      const key = await SecEnvUtils.resolveKey(options);
 
       console.log(chalk.blue(`☁️  Pushing backup to GitHub for project: ${projectName}`));
 
@@ -259,9 +251,7 @@ class SecEnvCommands {
     try {
       const { projectName } = SecEnvUtils.getProjectInfo();
       
-      if (!options.key) {
-        throw new Error('Decryption key is required. Use --key <password>');
-      }
+      const key = await SecEnvUtils.resolveKey(options);
 
       console.log(chalk.blue(`☁️  Pulling backup from GitHub for project: ${projectName}`));
 
@@ -284,7 +274,7 @@ class SecEnvCommands {
         console.log(chalk.gray(`🔓 Decrypting ${envFile}...`));
         
         const envData = backupData.environments[envFile];
-        const decryptedContent = SecEnvUtils.decrypt(envData.encrypted, options.key);
+        const decryptedContent = SecEnvUtils.decrypt(envData.encrypted, key);
         
         console.log(chalk.gray(`📝 Creating ${envFile}...`));
         await SecEnvUtils.writeEnvFile(envFile, decryptedContent);
@@ -297,6 +287,31 @@ class SecEnvCommands {
 
     } catch (error) {
       console.error(chalk.red('❌ Pull failed:'), error.message);
+      process.exit(1);
+    }
+  }
+
+  static async generateKey(options) {
+    try {
+      if (!options.output) {
+        throw new Error('Output file is required. Use --output <filename>');
+      }
+
+      console.log(chalk.blue('🔑 Generating new encryption key file...'));
+
+      // Generate cryptographically secure random key
+      const keyData = SecEnvUtils.generateKeyFile();
+      
+      // Write binary key file
+      await SecEnvUtils.writeKeyFile(options.output, keyData);
+
+      console.log(chalk.green('✅ Key file generated successfully!'));
+      console.log(chalk.gray(`📄 File: ${options.output}`));
+      console.log(chalk.yellow('⚠️  Keep this file secure and do not share it'));
+      console.log(chalk.yellow('💡 Use with: secenv backup --key-file ' + options.output));
+      
+    } catch (error) {
+      console.error(chalk.red('❌ Key generation failed:'), error.message);
       process.exit(1);
     }
   }

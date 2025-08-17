@@ -18,7 +18,8 @@ async function main() {
     program
       .command('backup')
       .description('Backup all .env files in current project')
-      .requiredOption('--key <password>', 'Encryption key/password')
+      .option('--key <password>', 'Encryption key/password')
+      .option('--key-file <file>', 'Path to binary key file')
       .action(async (options) => {
         await SecEnvCommands.backup(options);
       });
@@ -36,7 +37,8 @@ async function main() {
     program
       .command('restore')
       .description('Restore .env files from internal backup')
-      .requiredOption('--key <password>', 'Decryption key/password')
+      .option('--key <password>', 'Decryption key/password')
+      .option('--key-file <file>', 'Path to binary key file')
       .action(async (options) => {
         await SecEnvCommands.restore(options);
       });
@@ -45,7 +47,8 @@ async function main() {
     program
       .command('import <file>')
       .description('Import backup file and restore .env files')
-      .requiredOption('--key <password>', 'Decryption key/password')
+      .option('--key <password>', 'Decryption key/password')
+      .option('--key-file <file>', 'Path to binary key file')
       .action(async (file, options) => {
         await SecEnvCommands.import(file, options);
       });
@@ -64,7 +67,8 @@ async function main() {
     program
       .command('push')
       .description('Push backup to GitHub repository')
-      .requiredOption('--key <password>', 'Encryption key/password')
+      .option('--key <password>', 'Encryption key/password')
+      .option('--key-file <file>', 'Path to binary key file')
       .action(async (options) => {
         await SecEnvCommands.push(options);
       });
@@ -73,9 +77,19 @@ async function main() {
     program
       .command('pull')
       .description('Pull backup from GitHub repository')
-      .requiredOption('--key <password>', 'Decryption key/password')
+      .option('--key <password>', 'Decryption key/password')
+      .option('--key-file <file>', 'Path to binary key file')
       .action(async (options) => {
         await SecEnvCommands.pull(options);
+      });
+
+    // Generate key command
+    program
+      .command('generate-key')
+      .description('Generate a new binary encryption key file')
+      .requiredOption('--output <file>', 'Output key file path')
+      .action(async (options) => {
+        await SecEnvCommands.generateKey(options);
       });
 
     // Show help if no command provided

@@ -4,9 +4,10 @@
  * SecuredEnv Export/Import Example
  * 
  * This example demonstrates how to:
- * - Export backup files for sharing
+ * - Export backup files for sharing with passwords and key files
  * - Import backup files from external sources
  * - Handle cross-project sharing scenarios
+ * - Use binary key files for secure team collaboration
  */
 
 const SecuredEnv = require('../index');
@@ -88,10 +89,37 @@ async function exportImportExample() {
     }
 
     console.log('\n✅ Export/Import example completed successfully!');
+    
+    // 10. Demonstrate key file export/import
+    console.log('\n10. Demonstrating key file export/import...');
+    const crypto = require('crypto');
+    
+    // Create a team key file
+    const teamKeyFile = 'team.key';
+    const teamKeyData = crypto.randomBytes(32);
+    await fs.writeFile(teamKeyFile, teamKeyData);
+    const teamKeyPassword = teamKeyData.toString('base64');
+    console.log('   🔑 Generated team key file');
+    
+    // Export with key file
+    const keyExportPath = './team-backup.secenv';
+    const keyExportResult = await SecuredEnv.export(teamKeyPassword, keyExportPath);
+    console.log(`   ✅ Exported with key file: ${keyExportResult.exportPath}`);
+    
+    // Import with key file
+    const keyImportResult = await SecuredEnv.import(teamKeyPassword, keyExportPath);
+    console.log(`   ✅ Imported with key file: ${keyImportResult.files.join(', ')}`);
+    
+    // Cleanup
+    await fs.unlink(teamKeyFile);
+    await fs.unlink(keyExportPath);
+    console.log('   🧹 Cleaned up team files');
+
     console.log('\n💡 Key points:');
     console.log('   • Export creates a portable .secenv file');
     console.log('   • Import restores files AND saves backup internally');
-    console.log('   • Same password works across different machines');
+    console.log('   • Same password/key works across different machines');
+    console.log('   • Binary key files provide enhanced security for teams');
     console.log('   • Project identity preserved through folder name');
 
   } catch (error) {

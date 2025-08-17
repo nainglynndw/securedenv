@@ -7,14 +7,17 @@ SecuredEnv provides a simple yet powerful way to encrypt, backup, and manage env
 ## Features
 
 - 🔒 **Military-grade encryption** - AES-256-GCM with triple-layer PBKDF2 key derivation (650,000+ iterations)
+- 🔑 **Dual key support** - Password strings OR binary key files for maximum flexibility
 - 🌍 **Cross-platform support** - Works on Windows, macOS, and Linux
 - 📁 **Project isolation** - Each project has its own encrypted storage
 - 🔄 **Backup & Restore** - Secure backup and restore of environment files
 - ☁️ **GitHub Integration** - Cloud backup/sync using private GitHub repositories
 - 📤 **Import/Export** - Share encrypted environment files between machines
 - 🛡️ **Strong password validation** - Enforces secure password requirements
+- 🔐 **Binary key generation** - Create cryptographically secure key files
 - 📱 **CLI & Library** - Use as a command-line tool or programmatic library
 - 🚀 **Auto-detection** - Automatically finds and handles all .env\* files
+- 🔧 **Flexible key sources** - Use any binary file (SSH keys, certificates, etc.) as encryption key
 
 ## Installation
 
@@ -63,14 +66,57 @@ secenv push --key "YourStrongPassword123!"
 secenv pull --key "YourStrongPassword123!"
 ```
 
+### 🔑 Binary Key Files (New!)
+
+```bash
+# Generate a secure binary key file
+secenv generate-key --output my-project.key
+
+# Use binary key file instead of password
+secenv backup --key-file my-project.key
+secenv restore --key-file my-project.key
+secenv import backup.secenv --key-file my-project.key
+
+# GitHub sync with key file
+secenv push --key-file my-project.key
+secenv pull --key-file my-project.key
+
+# Use any binary file as a key (SSH keys, certificates, etc.)
+secenv backup --key-file ~/.ssh/id_rsa
+secenv backup --key-file /path/to/certificate.pem
+secenv backup --key-file custom-binary-file.bin
+```
+
+### Key Options
+
+**You have two options for encryption keys:**
+
+1. **Password strings** - `--key "password"`
+   - Interactive and easy to remember
+   - Must meet strong password requirements
+   - Suitable for personal use and team sharing
+
+2. **Binary key files** - `--key-file path/to/file`
+   - Maximum security with cryptographically random data
+   - Unreadable binary format
+   - Can use existing files (SSH keys, certificates, etc.)
+   - Perfect for automated scripts and CI/CD
+
+**⚠️ Important:** You cannot use both `--key` and `--key-file` simultaneously. Choose one method per operation.
+
 ### Use without installing (with npx)
 
 ```bash
-# If installed as dev dependency, use npx
+# Basic commands with npx
 npx secenv backup --key "YourStrongPassword123!"
 npx secenv restore --key "YourStrongPassword123!"
 npx secenv export --output "./backup.secenv"
 npx secenv import --key "YourStrongPassword123!" "./backup.secenv"
+
+# Key file generation and usage
+npx secenv generate-key --output project.key
+npx secenv backup --key-file project.key
+npx secenv restore --key-file project.key
 
 # GitHub cloud backup with npx
 npx secenv config --github-token ghp_xxxxxxxxxxxx
@@ -79,8 +125,9 @@ npx secenv push --key "YourStrongPassword123!"
 npx secenv pull --key "YourStrongPassword123!"
 ```
 
-### Real-world Workflow
+### Real-world Workflows
 
+#### Password-Based Workflow
 ```bash
 # 1. In your project directory with .env files
 cd /path/to/your/project
@@ -98,6 +145,38 @@ secenv export --output "./prod-env.secenv"
 secenv import --key "MySecurePassword123!" "./prod-env.secenv"
 ```
 
+#### Binary Key File Workflow (Enhanced Security)
+```bash
+# 1. Generate a secure key file (one-time setup)
+secenv generate-key --output ~/.secenv/my-project.key
+
+# 2. Backup using key file
+cd /path/to/your/project
+secenv backup --key-file ~/.secenv/my-project.key
+
+# 3. Share key file securely with team (via secure channel)
+# Copy ~/.secenv/my-project.key to team members
+
+# 4. Team members can restore using the same key file
+secenv restore --key-file ~/.secenv/my-project.key
+
+# 5. Export and import also work with key files
+secenv export --output "./prod-env.secenv"
+secenv import "./prod-env.secenv" --key-file ~/.secenv/my-project.key
+```
+
+#### CI/CD Integration
+```bash
+# In your CI/CD pipeline
+# Store binary key file as a secure CI/CD secret
+
+# Restore environment in build pipeline
+secenv restore --key-file "$CI_SECRET_KEY_FILE"
+
+# Or use existing SSH key as encryption key
+secenv restore --key-file ~/.ssh/id_rsa
+```
+
 ### GitHub Cloud Backup Workflow
 
 ```bash
@@ -108,11 +187,15 @@ secenv config --github-repo username/my-env-backups
 # Daily workflow in your project
 cd /path/to/your/project
 
-# Push to GitHub (backup + upload)
+# Push to GitHub (backup + upload) - with password
 secenv push --key "MySecurePassword123!"
+
+# Or push with key file
+secenv push --key-file ~/.secenv/my-project.key
 
 # On another machine, pull from GitHub
 secenv pull --key "MySecurePassword123!"
+secenv pull --key-file ~/.secenv/my-project.key
 
 # Check current configuration
 secenv config
@@ -167,7 +250,9 @@ username/my-env-backups/
 - **IV**: 16-byte random initialization vector per encryption
 - **Authentication**: Built-in authentication tag prevents tampering
 
-### Password Requirements
+### Key Requirements
+
+#### Password Requirements (--key option)
 
 - Minimum 12 characters
 - Must contain uppercase letters
@@ -186,6 +271,27 @@ username/my-env-backups/
 --key "password123"          # Too common
 --key "mypassword"           # No numbers/symbols
 --key "SHORT1!"              # Too short
+```
+
+#### Binary Key File Requirements (--key-file option)
+
+- Any readable binary file works as a key
+- Recommended: 32+ bytes for optimal security
+- Generated keys are cryptographically secure (32 bytes)
+- Can reuse existing secure files (SSH keys, certificates)
+
+```bash
+# ✅ Supported key file types
+--key-file project.key           # Generated key file
+--key-file ~/.ssh/id_rsa         # SSH private key
+--key-file /path/to/cert.pem     # Certificate file
+--key-file custom-binary.bin     # Any binary file
+--key-file secure-random.dat     # Random data file
+
+# ✅ Generate secure key files
+secenv generate-key --output secure.key
+openssl rand 32 > random.key
+dd if=/dev/urandom of=entropy.key bs=32 count=1
 ```
 
 ### Storage Security
@@ -256,6 +362,54 @@ SecuredEnv automatically detects these environment file patterns:
 - `.env.template`
 - `*.secenv` (backup files)
 
+## All CLI Commands Reference
+
+### Core Commands
+
+```bash
+# Generate secure binary key file
+secenv generate-key --output <filename>
+
+# Backup environment files
+secenv backup --key <password>           # Using password
+secenv backup --key-file <file>          # Using binary key file
+
+# Restore environment files
+secenv restore --key <password>          # Using password  
+secenv restore --key-file <file>         # Using binary key file
+
+# Export backup to external file
+secenv export --output <filename>
+
+# Import backup from external file
+secenv import <file> --key <password>    # Using password
+secenv import <file> --key-file <file>   # Using binary key file
+```
+
+### GitHub Integration Commands
+
+```bash
+# Configure GitHub integration
+secenv config --github-token <token>     # Set GitHub token
+secenv config --github-repo <owner/repo> # Set repository
+secenv config                            # Show current config
+
+# Cloud backup sync
+secenv push --key <password>             # Push with password
+secenv push --key-file <file>            # Push with key file
+
+secenv pull --key <password>             # Pull with password
+secenv pull --key-file <file>            # Pull with key file
+```
+
+### Help and Information
+
+```bash
+secenv --help                            # Show general help
+secenv <command> --help                  # Show command-specific help
+secenv --version                         # Show version
+```
+
 ## GitHub Integration Benefits
 
 ### ✅ **Free for Solo Developers**
@@ -285,10 +439,18 @@ secenv pull --key "password"
 ### ✅ **Fully Tested & Production Ready**
 ```
 ✅ All Core Commands Verified:
-  • backup/restore: 9 environment files encrypted/decrypted
+  • backup/restore: Multiple environment files encrypted/decrypted
   • export/import: Portable backup creation & restoration
   • config: GitHub token & repository configuration
-  • push/pull: Cloud sync with 4KB encrypted backup
+  • push/pull: Cloud sync with encrypted backup
+  • generate-key: Cryptographically secure key file generation
+
+✅ Key Management Verified:
+  • Password-based encryption (strong password validation)
+  • Binary key file encryption (32-byte secure keys)
+  • Custom key files (SSH keys, certificates, etc.)
+  • Cross-compatibility protection (different keys isolated)
+  • Error handling (missing files, invalid options, etc.)
 
 ✅ Node.js Compatibility Verified:
   • Node.js 20+ requirement (for release tooling only)
@@ -301,11 +463,14 @@ secenv pull --key "password"
   • 650,000+ PBKDF2 iterations working
   • Binary format with XOR obfuscation
   • GitHub API authentication secure
+  • Binary key files unreadable and secure
 
-✅ Automated Testing:
-  • 5/5 core tests passing
-  • Manual verification completed
+✅ Comprehensive Testing:
+  • 14/14 test cases passing
+  • Password and key file scenarios covered
+  • Error handling and edge cases tested
   • CI/CD pipeline validated
+  • Manual verification completed
 ```
 
 ## Contributing
@@ -354,7 +519,17 @@ npm run release:major    # Major version
 
 See [CHANGELOG.md](CHANGELOG.md) for detailed release notes.
 
-### v1.1.0 (Latest)
+### v1.2.0 (Latest)
+
+- 🔑 **Binary Key Files** - Support for secure binary key files alongside passwords
+- 🔐 **generate-key command** - Create cryptographically secure 32-byte key files
+- 🔧 **Flexible key sources** - Use any binary file (SSH keys, certificates, etc.) as encryption key
+- ⚡ **Enhanced security** - Unreadable binary format for maximum protection
+- 🛠️ **CI/CD ready** - Perfect for automated deployments and secure pipelines
+- ✅ **Comprehensive testing** - 14 test cases covering all key file scenarios
+- 📚 **Updated documentation** - Complete binary key file usage guide
+
+### v1.1.0
 
 - ☁️ **GitHub Integration** - Cloud backup using private repositories
 - 🔧 **New Commands**: `config`, `push`, `pull` for GitHub sync
