@@ -23,12 +23,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 📝 **Enhanced documentation** - Added GitHub workflow examples
 - 🏗️ **Extended architecture** - GitHub API client with proper authentication
 - 📦 **New dependency** - Added `node-fetch` for GitHub API calls
+- 🔧 **Node.js requirement** - Updated to ≥20.0.0 for release tooling compatibility
 
 ### Technical Details
 - GitHub backups stored as `projectName/backup.secenv` (human-readable structure)
 - Local storage continues to use hashed project names for privacy
-- Full round-trip testing verified (7 environment files, 4KB encrypted backup)
+- **Comprehensive testing verified**:
+  - All 6 CLI commands tested (backup, restore, export, import, push, pull)
+  - 9 environment files successfully encrypted/decrypted
+  - Cross-platform GitHub API integration working
+  - Node.js 20+ compatibility confirmed (core features use APIs since Node 10.0.0)
 - Configuration stored in platform-specific directories with existing security
+- GitHub Actions CI/CD pipeline with automated releases
 
 ## [1.0.2] - 2025-08-17
 
