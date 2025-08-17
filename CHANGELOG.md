@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.1] - 2025-08-17
+
+### Fixed
+- 📦 **NPM Publication** - Resolved NPM registry sync issue for proper package deployment
+
 ## [1.2.0] - 2025-08-17
 
 ### Added
